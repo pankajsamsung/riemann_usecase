@@ -1,13 +1,12 @@
-import json
 import logging
-import sys
+import json
 
 from confluent_kafka import Producer
 
 
 class KafkaHandler(logging.Handler):
 
-    def __init__(self, kafka_bootstrap_servers, kafka_topic, data_serializer_func):
+    def __init__(self, kafka_bootstrap_servers="kafka:9092", kafka_topic="program-logs", data_serializer_func=lambda v: v.encode('utf-8')):
         logging.Handler.__init__(self)
         self.producer = Producer({'bootstrap.servers': kafka_bootstrap_servers})
         self.kafka_topic = kafka_topic

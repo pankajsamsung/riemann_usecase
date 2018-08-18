@@ -1,24 +1,60 @@
-import logging
-import json
+import logging.config
+
 import time
 import sys
 
+from structlog import configure, processors, stdlib, threadlocal
 
-from utils.kafka_logging import KafkaHandler
+import structlog
 
-print("Starting")
-sys.stdout.flush()
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-logging_handler = KafkaHandler(kafka_bootstrap_servers="kafka:9092", kafka_topic="program-logs", data_serializer_func=lambda v: json.dumps(v).encode('utf-8'))
-logger.addHandler(logging_handler)
+#config from: https://blog.sneawo.com/blog/2017/07/28/json-logging-in-python/
+logging.config.dictConfig({
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'json': {
+            'format': '%(message)s %(lineno)d %(pathname)s',
+            'class': 'pythonjsonlogger.jsonlogger.JsonFormatter'
+        }
+    },
+    'handlers': {
+        'json': {
+            'class': 'utils.kafka_logging.KafkaHandler',
+            'formatter': 'json'
+        }
+    },
+    'loggers': {
+        '': {
+            'handlers': ['json'],
+            'level': logging.DEBUG
+        }
+    }
+})
+
+configure(
+    context_class=threadlocal.wrap_dict(dict),
+    logger_factory=stdlib.LoggerFactory(),
+    wrapper_class=stdlib.BoundLogger,
+    processors=[
+        stdlib.filter_by_level,
+        stdlib.add_logger_name,
+        stdlib.add_log_level,
+        stdlib.PositionalArgumentsFormatter(),
+        processors.TimeStamper(fmt="iso"),
+        processors.StackInfoRenderer(),
+        processors.format_exc_info,
+        processors.UnicodeDecoder(),
+        stdlib.render_to_log_kwargs]
+)
+
 
 while True:
     print("Logging loop start")
     sys.stdout.flush()
-    logger.info("Test my logger")
-    logger.debug("Well tested log")
+    log = structlog.getLogger(__name__)
+    log.info("Test my logger")
+    log.debug("Well tested log")
     print("Logging loop end")
     sys.stdout.flush()
     time.sleep(5)
