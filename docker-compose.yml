@@ -1,0 +1,25 @@
+version: '3'
+
+
+services:
+  zookeeper:
+    image: confluent/zookeeper
+
+  kafka:
+    image: confluent/kafka
+    links:
+      - zookeeper:zookeeper
+
+  riemann:
+    image: rlister/riemann
+    ports:
+      - "5556:5556"
+
+  riemann-dash:
+    image:  rlister/riemann-dash
+    ports:
+      - "4567:4567"
+
+  program:
+    build:
+      context: .
