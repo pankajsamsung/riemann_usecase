@@ -5,8 +5,8 @@ import sys
 
 from structlog import configure, processors, stdlib, threadlocal
 
-import structlog
-
+import subprogram1
+import subprogram2
 
 #config from: https://blog.sneawo.com/blog/2017/07/28/json-logging-in-python/
 logging.config.dictConfig({
@@ -52,9 +52,8 @@ configure(
 while True:
     print("Logging loop start")
     sys.stdout.flush()
-    log = structlog.getLogger(__name__)
-    log.info("Test my logger")
-    log.debug("Well tested log")
+    subprogram1.random_log()
+    subprogram2.random_log()
     print("Logging loop end")
     sys.stdout.flush()
-    time.sleep(5)
+    time.sleep(0.01)
