@@ -3,15 +3,15 @@ version: '3'
 
 services:
   zookeeper:
-    image: confluent/zookeeper
+    image: confluent/zookeeper:3.4.6-cp1
 
   kafka:
-    image: confluent/kafka
+    image: confluent/kafka:0.10.0.0-cp1
     links:
       - zookeeper:zookeeper
 
   riemann:
-    image: riemannio/riemann
+    image: riemannio/riemann:0.3.1
     volumes:
       - ./riemann.config:/etc/riemann.config
     environment:
